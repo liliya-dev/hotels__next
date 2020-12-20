@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import classes from './AccomodationsPage.module.scss';
+import classes from './accomodationsPage.module.scss';
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { AccomodationsList } from "../../components/AccomodationsList/AccomodationsList";
@@ -22,7 +22,6 @@ interface Props {
   rooms: string | number,
   currency: string
 }
-
 
 const AccomodationsPage: NextPage<Props> = ({ 
   hotels, isError, page, nextPage, isLoaded
