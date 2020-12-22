@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { useWindowResize } from "beautiful-react-hooks";
 import classes from './accomodationsPage.module.scss';
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { AccomodationsList } from "../../components/AccomodationsList/AccomodationsList";
-import { getHotels } from '../../components/pages/accomodations/helpers';
-import { searchResult } from '../../components/pages/accomodations/interface';
+import { getHotels } from '../../utils/accomodations/helpers';
+import { searchResult } from '../../utils/accomodations/interface';
 import { SearchForm } from '../../components/SearchComponents/SearchForm/SearchForm';
 import { MainLayout } from '../../components/MainLayout/MainLayout';
+import { ReloadButton } from '../../components/ReloadButton/ReloadButton';
 
 interface Props {
   isError: boolean,
@@ -23,13 +25,21 @@ interface Props {
   currency: string
 }
 
+const MOBILE_VIEW = 900;
+
 const AccomodationsPage: NextPage<Props> = ({ 
   hotels, isError, page, nextPage, isLoaded
 }) => {
   const router = useRouter();
   const [hotelsList, setHotelsList] = useState([]);
   const [successLoaded, setSuccessLoaded] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [windowWidth, setWindowWidth] = useState<number>(0);
+  const [isMobileVisible, setIsMobileVisible] = useState(false);
+
+  useWindowResize(() => {
+    setWindowWidth(window.innerWidth);
+  });
 
   useEffect(() => {
     setIsLoading(true);
@@ -45,6 +55,8 @@ const AccomodationsPage: NextPage<Props> = ({
   }, [hotels, isLoaded]);
 
   useEffect(() => {
+    setWindowWidth(window.innerWidth);
+    setIsLoading(true);
     if (page != 1) {
       setHotelsList([])
       router.push({
@@ -54,11 +66,12 @@ const AccomodationsPage: NextPage<Props> = ({
         },
       })
     }
+    setIsLoading(false);
   }, [])
 
   const changePage = () => {
-    setSuccessLoaded(false);
     setIsLoading(true);
+    setSuccessLoaded(false);
       router.push({
       query: {
         ...router.query,
@@ -67,26 +80,34 @@ const AccomodationsPage: NextPage<Props> = ({
     })
   }
 
-  const reload = () => {
-    router.reload();
-  }
-
   const setLoadingFromChild = () => {
     setIsLoading(true);
+  }
+
+  const toggleMenu = () => {
+    setIsMobileVisible(!isMobileVisible);
   }
 
   return (
     <MainLayout title="results">
       <div className={classes.container}>
-        <SearchForm />
+        {
+          windowWidth > MOBILE_VIEW
+            ? <SearchForm isLoadingFromParent={isLoading} />
+            : (
+              isMobileVisible
+              ? (
+                <>
+                  <SearchForm isLoadingFromParent={isLoading} />
+                  <button onClick={toggleMenu} type="button" className={classes.button}>Hide search form &#x279A;</button>
+                </>
+              )
+              : <button onClick={toggleMenu} type="button" className={classes.button}>Show search form &#x2798;</button>
+            )
+        }
         {
           isError 
-          ? (
-            <div>
-              <p>some error occured during request, please try again</p>
-              <button onClick={reload} type="button">try again</button>
-            </div>
-          )
+          ? <ReloadButton />
           : (
             <>
               <AccomodationsList 
@@ -124,6 +145,16 @@ export async function getServerSideProps(context) {
           page,
           isLoaded: true,
           checkIn, checkOut, lat, lon, rooms, currency
+        }
+      }
+    } else {
+      return {
+        props: {
+          hotels: [],
+          isError: true,
+          nextPage: 1,
+          count: 0,
+          page
         }
       }
     }

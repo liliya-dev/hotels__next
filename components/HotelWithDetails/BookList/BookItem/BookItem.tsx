@@ -1,75 +1,10 @@
 import { useState } from 'react';
 import classes from './BookItem.module.scss';
 import { BookitemDetails } from './BookitemDetails/BookitemDetails';
+import { Room } from '../interface';
 
 interface Props {
-  room: {
-    additionalInfo: {
-      description: string,
-      details: {
-        amenities: string[]
-      }
-    },
-    bedChoices: {
-      mainOptions: string[]
-    },
-    images: {
-      caption: string,
-      fullSizeUrl: string,
-      thumbnailUrl: string
-    }[],
-    maxOccupancy: {
-      children: number,
-      messageChildren: string,
-      messageTotal: string,
-      total: number
-    }, 
-    name: string,
-    ratePlans: {
-      cancellation: {
-        additionalInfo: string,
-        cancellationDate: string,
-        free: boolean,
-        info: string,
-        refaundable: boolean,
-        title: string
-      },
-      features: {
-        featureType: string,
-        title: string
-      }[],
-      occupancy: {
-        maxAdults: number,
-        maxChildren: number
-      },
-      offers: {
-        offer: {
-          promoType: string,
-          text: string
-        },
-        valueAdds: []
-      },
-      price: {
-        current: string, 
-        old: string,
-        unformattedCurrent: number,
-        totalPricePerStay: string,
-        priceBreakdown?: {
-          lineItems: {
-            label: string,
-            price: string
-          }[],
-          total: {
-            label: string,
-            price: string
-          }
-        }
-      },
-      welcomeRewards: {
-        info: string
-      }
-    }[]
-  }
+  room: Room
 }
 
 export const BookItem: React.FC<Props> = ({ room }) => {
@@ -85,13 +20,19 @@ export const BookItem: React.FC<Props> = ({ room }) => {
      <div>
       <h5 className={classes.title}>{room.name}</h5>
      </div>
-     <div className={classes.photos}>
-       <img 
-        onClick={() => setIsDetailVisible(true)}
-        src={room.images[0].thumbnailUrl} 
-        alt={room.name}
-      />
-     </div>
+     {
+       room.images[0] && room.images[0].thumbnailUrl 
+       ? (
+        <div className={classes.photos}>
+          <img 
+            onClick={() => setIsDetailVisible(true)}
+            src={room.images[0].thumbnailUrl} 
+            alt={room.name}
+          />
+        </div>
+       )
+       : <p onClick={() => setIsDetailVisible(true)} className={`fs-18-italic ${classes.noPhoto}`}>No photos yet</p>
+     }
      <div className={classes.cancellationAndFeatures}>
        <ul>
          {

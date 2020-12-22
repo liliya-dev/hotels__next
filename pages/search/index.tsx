@@ -1,8 +1,7 @@
-import classes from './SearchPage.module.scss';
+import classes from './searchPage.module.scss';
 import { NextPage } from 'next';
 import { MainLayout } from '../../components/MainLayout/MainLayout';
 import { SearchForm } from '../../components/SearchComponents/SearchForm/SearchForm';
-
 
 const SearchPage: NextPage = () => {
 
